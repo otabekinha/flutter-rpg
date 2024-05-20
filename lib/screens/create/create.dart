@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_rpg/model/character.dart';
 import 'package:flutter_rpg/model/vocation.dart';
 import 'package:flutter_rpg/screens/create/vocation_card.dart';
+import 'package:flutter_rpg/screens/home/home.dart';
 import 'package:flutter_rpg/shared/styled_button.dart';
 import 'package:flutter_rpg/shared/styled_text.dart';
 import 'package:flutter_rpg/theme.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:uuid/uuid.dart';
+
+var uuid = const Uuid();
 
 class Create extends StatefulWidget {
   const Create({super.key});
@@ -28,15 +33,70 @@ class _CreateState extends State<Create> {
   // submit handler
   void handleSubmit() {
     if (_nameController.text.trim().isEmpty) {
-      print('name must not empty');
+      showDialog(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: const StyledHeading('Missing Character Name'),
+            content: const StyledText(
+                'Every good rpg character needs a greate name'),
+            actions: [
+              StyledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const StyledHeading('close'),
+              ),
+            ],
+            actionsAlignment: MainAxisAlignment.center,
+          );
+        },
+      );
       return;
     }
     if (_sloganController.text.trim().isEmpty) {
-      print('slogan must not empty');
+      showDialog(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: const StyledHeading('Missing Slogan Name'),
+            content: const StyledText('Remember to add a catchy slogan...'),
+            actions: [
+              StyledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const StyledHeading('close'),
+              ),
+            ],
+            actionsAlignment: MainAxisAlignment.center,
+          );
+        },
+      );
       return;
     }
-    print(_nameController.text);
-    print(_sloganController.text);
+
+    characters.add(
+      Character(
+        name: _nameController.text,
+        slogan: _sloganController.text,
+        vocation: selectedVocation,
+        id: uuid.v4(),
+      ),
+    );
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => const Home(),
+      ),
+    );
+  }
+
+  Vocation selectedVocation = Vocation.junkie;
+
+  void updateVocation(Vocation vocation) {
+    setState(() {
+      selectedVocation = vocation;
+    });
   }
 
   @override
@@ -102,18 +162,39 @@ class _CreateState extends State<Create> {
                 child: StyledText('This determines your available skills.'),
               ),
               const SizedBox(height: 30),
-              const VocationCard(
+              VocationCard(
+                selected: selectedVocation == Vocation.junkie,
+                onTap: updateVocation,
                 vocation: Vocation.junkie,
               ),
-              const VocationCard(
+              VocationCard(
+                selected: selectedVocation == Vocation.ninja,
+                onTap: updateVocation,
                 vocation: Vocation.ninja,
               ),
-              const VocationCard(
+              VocationCard(
+                selected: selectedVocation == Vocation.raider,
+                onTap: updateVocation,
                 vocation: Vocation.raider,
               ),
-              const VocationCard(
+              VocationCard(
+                selected: selectedVocation == Vocation.wizard,
+                onTap: updateVocation,
                 vocation: Vocation.wizard,
               ),
+              Center(
+                child: Icon(
+                  Icons.code,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+              const Center(
+                child: StyledHeading('Good Luck'),
+              ),
+              const Center(
+                child: StyledText('And enjoy the journey...'),
+              ),
+              const SizedBox(height: 30),
               Center(
                 child: StyledButton(
                   onPressed: handleSubmit,
